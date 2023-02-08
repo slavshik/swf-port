@@ -20,7 +20,7 @@ const swf_id = `swf-${id}`;
         const player = ruffle.createPlayer();
         const container = document.getElementById("swf-container");
         container.appendChild(player);
-        player.load(`/swfs/${container.dataset.href}`);
+        player.load(`/ruffle-test/swfs/${container.dataset.href}`);
     });
 </script>
 <div id="swf-container" data-href={href}></div>
