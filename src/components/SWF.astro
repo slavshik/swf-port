@@ -1,0 +1,26 @@
+---
+export interface Props {
+    id: string;
+    title: string;
+    body: string;
+    href: string;
+}
+
+const {id, href, title, body} = Astro.props;
+const swf_id = `swf-${id}`;
+---
+
+<script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = {
+        publicPath: "../../ruffle/"
+    };
+    window.addEventListener("load", event => {
+        const ruffle = window.RufflePlayer.newest();
+        const player = ruffle.createPlayer();
+        const container = document.getElementById("swf-container");
+        container.appendChild(player);
+        player.load(`/swfs/${container.dataset.href}`);
+    });
+</script>
+<div id="swf-container" data-href={href}></div>
