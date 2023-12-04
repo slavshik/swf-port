@@ -19,16 +19,16 @@ declare const window: Window & {
 };
 ---
 
-<script src="/ruffle/ruffle.js" is:inline></script>
+<script src="/swf-port/ruffle/ruffle.js" is:inline></script>
 <script>
     window.RufflePlayer = window.RufflePlayer || {};
-    window.RufflePlayer.config = {publicPath: "/ruffle/"};
+    window.RufflePlayer.config = {publicPath: "/swf-port/ruffle/"};
     window.addEventListener("load", event => {
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         const container = document.getElementById("swf-container");
         container.appendChild(player);
-        player.load(`/swfs/${container.dataset.href}`);
+        player.load(`/swf-port/swfs/${container.dataset.href}`);
     });
 </script>
 <Layout title={name}>
