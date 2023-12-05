@@ -5,7 +5,7 @@ import Card from "../components/Card.astro";
 import fs from "fs";
 import path from "path";
 
-export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).map(file => ({
+export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).filter(file => file.endsWith(".swf")).map(file => ({
     name: file,
     path: file
 }));

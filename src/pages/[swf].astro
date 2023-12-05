@@ -1,17 +1,19 @@
 ---
 import fs from "fs";
 import Layout from "../layouts/Layout.astro";
+import path from "path";
+
 export function getStaticPaths() {
-    const propsFromFilename = (filename: string) => {
-        switch (filename) {
-            case "f_489783c6a91fd.swf":
-                return { bgColor: "black" };
-        }
-        return { bgColor: "white" };
-    };
-    return fs.readdirSync("public/swfs").map(file => {
-            return { params: { swf: file }, props: propsFromFilename(file) };
-            });
+  const propsFromFilename = (filename: string) => {
+    const propsPath = `public/swfs/${path.basename(filename, ".swf")}.json`;
+    if (fs.existsSync(propsPath)) {
+      return JSON.parse(fs.readFileSync(propsPath, "utf-8"));
+    }
+    return { bgColor: "white" };
+  };
+  return fs.readdirSync("public/swfs").filter(file => file.endsWith(".swf")).map(file => {
+    return { params: { swf: file }, props: propsFromFilename(file) };
+  });
 }
 const { swf, name } = Astro.params;
 const { bgColor } = Astro.props;
@@ -51,6 +53,7 @@ declare const window: Window & {
         margin: 0;
         padding: 0;
     }
+
     .ruffle-cont {
         display: flex;
         justify-content: center;
