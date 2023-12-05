@@ -2,40 +2,49 @@
 import fs from "fs";
 import Layout from "../layouts/Layout.astro";
 export function getStaticPaths() {
+    const propsFromFilename = (filename: string) => {
+        switch (filename) {
+            case "f_489783c6a91fd.swf":
+                return { bgColor: "black" };
+        }
+        return { bgColor: "white" };
+    };
     return fs.readdirSync("public/swfs").map(file => {
-        return {params: {swf: file, name: Math.random()}};
-    });
+            return { params: { swf: file }, props: propsFromFilename(file) };
+            });
 }
-const {swf, name} = Astro.params;
+const { swf, name } = Astro.params;
+const { bgColor } = Astro.props;
+
 interface RufflePlayer extends HTMLElement {
-    load: (url: string) => void;
+  load: (url: string) => void;
 }
 declare const window: Window & {
-    RufflePlayer?: Partial<{
-        newest: () => {
-            createPlayer: () => RufflePlayer;
-        };
-        config: {
-            publicPath: string;
-        };
-    }>;
+  RufflePlayer?: Partial<{
+    newest: () => {
+      createPlayer: () => RufflePlayer;
+    };
+    config: {
+      publicPath: string;
+    };
+  }>;
 };
 ---
 
 <script src="/swf-port/ruffle/ruffle.js" is:inline></script>
 <script>
-    window.RufflePlayer = window.RufflePlayer || {};
-    window.RufflePlayer.config = {publicPath: "/swf-port/ruffle/"};
-    window.addEventListener("load", event => {
-        const ruffle = window.RufflePlayer.newest();
-        const player = ruffle.createPlayer();
-        const container = document.getElementById("ruffle-main");
-        container.appendChild(player);
-        player.load(`/swf-port/swfs/${container.dataset.href}`);
-    });
+  window.RufflePlayer = window.RufflePlayer || {};
+  window.RufflePlayer.config = { publicPath: "/swf-port/ruffle/" };
+  window.addEventListener("load", event => {
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
+    const container = document.getElementById("ruffle-main");
+    container.appendChild(player);
+    player.load(`/swf-port/swfs/${container.dataset.href}`);
+  });
 </script>
-<Layout title={name}>
-    <div id="ruffle-main" class="ruffle-cont" data-href={swf}></div>
+<Layout title={bgColor} bgColor={bgColor}>
+  <div id="ruffle-main" class="ruffle-cont" data-href={swf}></div>
 </Layout>
 <style>
     body {
