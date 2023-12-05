@@ -7,10 +7,13 @@ export function getStaticPaths() {
     });
 }
 const {swf, name} = Astro.params;
+interface RufflePlayer extends HTMLElement {
+    load: (url: string) => void;
+}
 declare const window: Window & {
     RufflePlayer?: Partial<{
         newest: () => {
-            createPlayer: () => any;
+            createPlayer: () => RufflePlayer;
         };
         config: {
             publicPath: string;
@@ -26,11 +29,23 @@ declare const window: Window & {
     window.addEventListener("load", event => {
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
-        const container = document.getElementById("swf-container");
+        const container = document.getElementById("ruffle-main");
         container.appendChild(player);
         player.load(`/swf-port/swfs/${container.dataset.href}`);
     });
 </script>
 <Layout title={name}>
-    <div id="swf-container" data-href={swf}></div>
+    <div id="ruffle-main" class="ruffle-cont" data-href={swf}></div>
 </Layout>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .ruffle-cont {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+</style>
