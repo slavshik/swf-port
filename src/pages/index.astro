@@ -5,18 +5,29 @@ import Card from "../components/Card.astro";
 import fs from "fs";
 import path from "path";
 
-export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).filter(file => file.endsWith(".swf")).map(file => ({
+export const getPath = (file: string = "") => path.join(process.cwd(), "public/swfs", file);
+export const files = fs.readdirSync(getPath()).filter(file => file.endsWith(".swf")).map(file => {
+  const jsonPath = getPath(file.replace(".swf", ".json"));
+  let props = {};
+  if (fs.existsSync(jsonPath)) {
+    props = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+  }
+
+  return {
+    ...props,
     name: file,
-    path: file
-}));
+    href: `${import.meta.env.BASE_URL}${file}`,
+  };
+});
 ---
 
 <Layout title="Flash...">
-    <main>
-        <ul role="list" class="link-card-grid">
-            {files.map(({name, path}) => <Card title={name} href={path} />)}
-        </ul>
-    </main>
+  <main>
+    <ul role="list" class="link-card-grid">
+      {files.map(({ title, name,  href }) =>
+        <Card title={(title || name)} href={href} />)}
+    </ul>
+  </main>
 </Layout>
 
 <style>
@@ -25,11 +36,13 @@ export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).fil
         padding: 1.5rem;
         max-width: 60ch;
     }
+
     h1 {
         font-size: 3rem;
         font-weight: 800;
         margin: 0;
     }
+
     .text-gradient {
         background-image: var(--accent-gradient);
         -webkit-background-clip: text;
@@ -37,6 +50,7 @@ export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).fil
         background-size: 400%;
         background-position: 0%;
     }
+
     .instructions {
         line-height: 1.6;
         margin: 1rem 0;
@@ -45,6 +59,7 @@ export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).fil
         padding: 1rem;
         border-radius: 0.4rem;
     }
+
     .instructions code {
         font-size: 0.875em;
         font-weight: bold;
@@ -53,9 +68,11 @@ export const files = fs.readdirSync(path.join(process.cwd(), "public/swfs")).fil
         border-radius: 4px;
         padding: 0.3em 0.45em;
     }
+
     .instructions strong {
         color: rgb(var(--accent));
     }
+
     .link-card-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));

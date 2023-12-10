@@ -16,6 +16,7 @@ const { title, bgColor } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
+	<script src=`${import.meta.env.BASE_URL}/ruffle/ruffle.js` is:inline></script>
 	<body style={{ '--bg-color': bgColor }}>
 		<slot />
 	</body>

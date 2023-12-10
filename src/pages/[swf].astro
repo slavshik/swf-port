@@ -3,21 +3,43 @@ import fs from "fs";
 import Layout from "../layouts/Layout.astro";
 import path from "path";
 
+type AstroProps = {
+  bgColor: string,
+  width: string,
+  height: string,
+  title: string,
+};
 export function getStaticPaths() {
+  const publicSwfs = "public/swfs";
   const propsFromFilename = (filename: string) => {
-    const propsPath = `public/swfs/${path.basename(filename, ".swf")}.json`;
+    const propsPath = `${publicSwfs}/${path.basename(filename, ".swf")}.json`;
     if (fs.existsSync(propsPath)) {
       return JSON.parse(fs.readFileSync(propsPath, "utf-8"));
     }
     return { bgColor: "white" };
   };
-  return fs.readdirSync("public/swfs").filter(file => file.endsWith(".swf")).map(file => {
+  // fs.readdirSync(publicSwfs).filter(file => file.endsWith(".json")).map(file => {
+  //   const props = JSON.parse(fs.readFileSync(`${publicSwfs}/${file}`, "utf-8"));
+  //   fs.writeFileSync(`${publicSwfs}/${file}`, JSON.stringify({
+  //     title: ""
+  //     // ...props,
+  //     // width: "100%",
+  //     // height: "100%"
+  //   }));
+  // });
+  return fs.readdirSync(publicSwfs).filter(file => file.endsWith(".swf")).map(file => {
     return { params: { swf: file }, props: propsFromFilename(file) };
   });
 }
 const { swf, name } = Astro.params;
-const { bgColor } = Astro.props;
-
+const { bgColor, width, height, title } = Astro.props as AstroProps;
+const pageTitle = title || path.basename(swf);
+const dataPropsString = JSON.stringify({
+  swf,
+  bgColor,
+  width,
+  height,
+});
 interface RufflePlayer extends HTMLElement {
   load: (url: string) => void;
 }
@@ -33,22 +55,24 @@ declare const window: Window & {
 };
 ---
 
-<script src="/swf-port/ruffle/ruffle.js" is:inline></script>
 <script>
+  const path = import.meta.env.BASE_URL;
   window.RufflePlayer = window.RufflePlayer || {};
-  window.RufflePlayer.config = { publicPath: "/swf-port/ruffle/" };
+  window.RufflePlayer.config = { publicPath: `${path}/ruffle/` };
   window.addEventListener("load", event => {
     const ruffle = window.RufflePlayer.newest();
     const player = ruffle.createPlayer();
     const container = document.getElementById("ruffle-main");
-    player.style.width = "100%";
-    player.style.height = "100%";
+    const dataProps = JSON.parse(container.dataset.props);
+    const { width, height } = dataProps;
+    player.style.width = width || "100%"
+    player.style.height = height || "100%";
     container.appendChild(player);
-    player.load(`/swf-port/swfs/${container.dataset.href}`);
+    player.load(`${path}/swfs/${dataProps.swf}`);
   });
 </script>
-<Layout title={swf} bgColor={bgColor}>
-  <div id="ruffle-main" class="ruffle-cont" data-href={swf}></div>
+<Layout title={pageTitle} bgColor={bgColor}>
+  <div id="ruffle-main" class="ruffle-cont" data-props={dataPropsString}></div>
 </Layout>
 <style>
     body {
